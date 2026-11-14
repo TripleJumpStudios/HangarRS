@@ -39,7 +39,7 @@ async fn main() {
     if let Ok(comm) = proc::read_comm(main.pid) {
         println!("  comm:    {comm}   <- not the app's name");
     }
-    if let Ok(exe) = std::fs::read_link(format!("/proc/{}/exe", main.pid)) {
+    if let Ok(exe) = tokio::fs::read_link(format!("/proc/{}/exe", main.pid)).await {
         println!(
             "  exe:     {}   <- the same for every Wine process",
             exe.display()

@@ -644,7 +644,7 @@ mod tests {
             if is_running(&needle).is_running() {
                 break;
             }
-            std::thread::sleep(Duration::from_millis(10));
+            tokio::time::sleep(Duration::from_millis(10)).await;
         }
 
         let found = is_running(&needle);

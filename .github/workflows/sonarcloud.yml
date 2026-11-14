@@ -22,8 +22,9 @@ jobs:
           fetch-depth: 0  # required for blame/history analysis
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable branch, 2026-11-14
         with:
+          toolchain: stable
           components: clippy
 
       - name: Cache cargo
@@ -38,7 +39,7 @@ jobs:
             ${{ runner.os }}-cargo-sonar-
 
       - name: Install cargo-tarpaulin
-        uses: taiki-e/install-action@v2
+        uses: taiki-e/install-action@4a76afe23f9e08d2d9550fb56e556444e8611d21 # v2.90.4
         with:
           tool: cargo-tarpaulin
 
@@ -51,6 +52,6 @@ jobs:
         run: cargo tarpaulin --workspace --engine llvm --out xml --locked --timeout 1800 --exclude-files 'target/*' 'archive/*' -- --test-threads=1
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v6
+        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
