@@ -1,0 +1,11 @@
+Mono path[0] = 'C:/BeyondATC/BeyondATC_Data/Managed'
+Mono config path = 'C:/BeyondATC/MonoBleedingEdge/etc'
+[Updater] Latest version: 1.10.2.Experimental, current: 1.10.2.Experimental
+ERROR DIALOG: Must input a valid Simbrief ID!
+Detected Microsoft Flight Simulator 2020 is in use
+ERROR DIALOG: Flight Simulator is not running! Please start the simulator before starting BeyondATC.
+Detected Microsoft Flight Simulator 2020 is in use
+ERROR DIALOG: Flight Simulator is not running! Please start the simulator before starting BeyondATC.
+Detected Microsoft Flight Simulator 2020 is in use
+ERROR DIALOG: Flight Simulator is not running! Please start the simulator before starting BeyondATC.
+[QuitGuard] wantsToQuit | programStarted=False | approved=False | allowQuit=True

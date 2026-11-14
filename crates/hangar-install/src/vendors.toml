@@ -1,0 +1,258 @@
+# The vendor table HangarRS ships.
+#
+# Every entry here comes from an install that went wrong first.
+#
+# Add your own in $XDG_CONFIG_HOME/hangar-rs/vendors.toml, in exactly this
+# format. A user entry wins a tie against a shipped one, so an entry with the
+# same company and product overrides what is here.
+#
+# Matching: `engine` must be exact if it is given at all; `company` and
+# `product` are case-insensitive patterns where `*` matches anything. The most
+# specific matching entry wins, so a family default sits under the named ones
+# without shadowing them.
+#
+# `args` — switches passed to the installer itself, after its path. No entry
+# here sets any, and that is deliberate. Each engine documents a vocabulary:
+#
+#     WiX Burn        /quiet  /passive  /norestart  /repair  /uninstall
+#     NSIS            /S
+#     Inno Setup      /SILENT  /VERYSILENT  /SUPPRESSMSGBOXES
+#     InstallShield   /s with a recorded .iss response file
+#
+# None of them has been observed working here, and a switch that is wrong for
+# a particular title looks exactly like an installer that failed. A silent run
+# also hides InstallShield's MAX_PATH prompt rather than answering it, and a
+# suppressed prompt may well take Abort — which rolls the whole install back.
+# Set them per title in your own vendors.toml once you have watched one work.
+#
+# `powershell` — `park` (the default, and what every entry here gets) or
+# `keep`. Wine's powershell.exe is a stub that exits 0 for every command, so
+# any installer that asks it a question gets an answer that is wrong whenever
+# the truth is "no". `park` moves it aside for the run and puts it back after.
+# Unlike everything else in this file it is a policy rather than a per-vendor
+# observation, because the thing it works around is Wine's behaviour and not a
+# vendor's. Set `keep` only for a title that refuses outright when
+# powershell.exe is absent; none has been seen.
+
+# ---------------------------------------------------------------------------
+# InstallShield — Just Flight, Black Square, and the InstallScript family
+# ---------------------------------------------------------------------------
+
+[[vendor]]
+name = "Just Flight / Black Square"
+engine = "installshield"
+company = "just flight*"
+prefix = "msfs"
+verb = "run"
+cwd = "inherit"
+produces = "package"
+runtimes = ["dotnet-desktop-x64", "dotnet-install-location"]
+bad_console = [
+    "Error Creating process",
+    "valid purchase",
+    "File name is too long",
+    "0xce",
+]
+notes = """
+The purchase check spawns its login helper as a bare `WebView2.exe`, and the \
+failure it produces reads as DRM rejection rather than as the process-spawn \
+failure it is. It has only ever passed here with the working directory \
+HangarRS itself inherits — protontricks from the installer's own directory \
+failed the check, and a bare runinprefix from a third directory never started \
+the installer at all. Why is still unidentified, so this reproduces the launch \
+conditions rather than reasoning about them.
+
+MAX_PATH fires on deep package files: answer Ignore, never Abort. Abort rolls \
+back the whole four-gigabyte install; Ignore skips one file, which is then \
+repaired out of band with `unshield` by basename. On a fresh install those \
+files are genuinely missing afterwards — on an update the previous copy is \
+still there, which is why the 2026-08-21 updates verified clean.
+"""
+
+[[vendor]]
+name = "InstallShield (any)"
+engine = "installshield"
+prefix = "msfs"
+verb = "run"
+cwd = "inherit"
+produces = "package"
+bad_console = ["File name is too long", "0xce", "Error Creating process"]
+notes = """
+The stub unpacks its engine to %TEMP% and exits. Under `proton run` the Steam \
+session wrapper tears the prefix down the moment the stub returns, which kills \
+the engine and produces exit code 0, no output and nothing installed. Both \
+Just Flight installs on 2026-08-21 nevertheless succeeded through `run`, so \
+this is not universally fatal and is left as the family default until a case \
+proves otherwise.
+"""
+
+# ---------------------------------------------------------------------------
+# WiX Burn — Garmin, and Microsoft's runtimes
+# ---------------------------------------------------------------------------
+
+[[vendor]]
+name = "Garmin Aviation Trainers"
+engine = "wix-burn"
+company = "garmin*"
+prefix = "msfs"
+verb = "run"
+cwd = "inherit"
+app_cwd = "app-dir"
+produces = "companion-app"
+runtimes = ["dotnet-desktop-6-x86", "prefix-fonts"]
+bad_console = ["u_charsToUChars", "icuuc68", "FailFast"]
+notes = """
+Uncheck "Launch Aviation Trainers" at the end. A child process started from \
+the installer inherits an environment without \
+DOTNET_SYSTEM_GLOBALIZATION_USENLS, and the .NET 6 x86 launcher then dies \
+before any window appears — which looks exactly like a failed install.
+
+The launcher resolves Interop.IWshRuntimeLibrary.dll relative to its working \
+directory and reports the failure at power-on rather than at startup, so a \
+wrong CWD presents as a broken avionics stack. An empty C:\\windows\\Fonts \
+hard-crashes WPF during text layout; the live MSFS prefix has 18 fonts and a \
+fresh prefix has none.
+"""
+
+[vendor.env]
+DOTNET_SYSTEM_GLOBALIZATION_USENLS = "1"
+
+[[vendor]]
+name = "Microsoft .NET Desktop Runtime"
+engine = "wix-burn"
+company = "microsoft*"
+product = "*desktop runtime*"
+prefix = "msfs"
+verb = "run"
+cwd = "inherit"
+produces = "runtime"
+notes = """
+A prerequisite, not a library item: it is installed for something else and \
+never appears in the Hangar. Silent install works — `/install /quiet \
+/norestart`. Wine's MSI run creates InstalledVersions\\x64\\sharedhost but \
+omits InstallLocation, and without that key a 64-bit app spawned by a 32-bit \
+installer inherits ProgramFiles=C:\\Program Files (x86) and looks for the \
+runtime in a directory that does not exist. `dotnet --list-runtimes` works \
+fine from a shell throughout, which makes it deceptive to diagnose.
+"""
+
+[[vendor]]
+name = "WiX Burn (any)"
+engine = "wix-burn"
+prefix = "msfs"
+verb = "run"
+cwd = "inherit"
+produces = "unknown"
+notes = "A bundle: it chains other installers, so what lands is whatever they install."
+
+# ---------------------------------------------------------------------------
+# TDS — the GTNXi stack, which installs through its own manager
+# ---------------------------------------------------------------------------
+
+[[vendor]]
+name = "TDS GPS Manager"
+company = "tds*"
+prefix = "msfs"
+verb = "run"
+cwd = "installer-dir"
+produces = "sim-addon"
+runtimes = ["dotnet-desktop-6-x86", "prefix-fonts"]
+notes = """
+Themida-packed, so stage 1 cannot name an engine for it — matched on the \
+vendor instead. It is the supported path for GTNXi: it drives Garmin's own \
+installer, so the Garmin requirements apply to what it spawns.
+
+What it registers is a <Launch.Addon> in EXE.xml, which means MSFS starts the \
+executable itself. It must never become an app-runner entry: launching it \
+separately starts a second copy, and the VC-integrated and standalone modes \
+cannot run at the same time. The useful control is a toggle on <Disabled>.
+"""
+
+[vendor.env]
+DOTNET_SYSTEM_GLOBALIZATION_USENLS = "1"
+
+# ---------------------------------------------------------------------------
+# NSIS / Electron / Squirrel — the companion apps
+# ---------------------------------------------------------------------------
+
+[[vendor]]
+name = "Project Airports"
+engine = "nsis"
+company = "project airports*"
+prefix = "companion"
+verb = "run"
+cwd = "inherit"
+produces = "companion-app"
+notes = """
+Electron, though nothing in the installer says so — electron-builder ships \
+NSIS with the app in an LZMA archive. It syncs a scenery database that the sim \
+only picks up if the sync finished first, so in a preflight it belongs before \
+the sim rather than after it.
+
+It relaunches itself after an update with its own arguments, so a configured \
+--no-sandbox does not survive that; it works anyway.
+"""
+
+[[vendor]]
+name = "Orbx Central"
+payload = "downloads"
+engine = "nsis"
+company = "orbx*"
+prefix = "companion"
+verb = "run"
+cwd = "inherit"
+produces = "companion-app"
+notes = """
+electron-builder, and the first installer that proved why `powershell` is a \
+field. Its running-check asks PowerShell whether any process is running out \
+of the install directory, and Wine's PowerShell is a stub that exits 0 for \
+every command — so the answer is always "yes, it is running". It then offers \
+to close an application that was never open, fails, and shows "Orbx Central \
+cannot be closed. Please close it manually and click Retry to continue."
+
+No prefix state affects that. It was reproduced on 2026-08-31 against a \
+pristine prefix with no Orbx install and no Orbx registry key anywhere on the \
+machine. With the stub parked it falls back to `tasklist … | find …`, which \
+Wine implements correctly, and the install completes: 135 MB downloaded, \
+450 MB unpacked, and the app launches.
+
+`nsis-web`, so the 0.7 MB stub is a downloader — it fetches \
+orbx-central-4.5.48-x64.nsis.7z from orbxdirect.com into \
+AppData\\Local\\orbx-central-updater\\package.7z. The gate's payload \
+estimate is unknown; `payload = "downloads"` keeps the space check unchecked.
+"""
+
+[[vendor]]
+name = "NSIS (any)"
+engine = "nsis"
+prefix = "companion"
+verb = "run"
+cwd = "inherit"
+produces = "companion-app"
+
+[[vendor]]
+name = "Inno Setup (any)"
+engine = "inno-setup"
+prefix = "companion"
+verb = "run"
+cwd = "inherit"
+produces = "companion-app"
+notes = "Unverified here: no Inno installer has been seen on this machine."
+
+[[vendor]]
+name = "Squirrel (any)"
+engine = "squirrel"
+prefix = "companion"
+verb = "run"
+cwd = "inherit"
+produces = "companion-app"
+notes = "Unverified here: no Squirrel installer has been seen on this machine."
+
+[[vendor]]
+name = "Windows Installer package"
+engine = "msi"
+prefix = "msfs"
+verb = "run"
+cwd = "installer-dir"
+produces = "unknown"
+notes = "Runs through msiexec rather than by being executed."

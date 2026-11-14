@@ -1,0 +1,6 @@
+Mono path[0] = 'C:/BeyondATC/BeyondATC_Data/Managed'
+Mono config path = 'C:/BeyondATC/MonoBleedingEdge/etc'
+[Updater] Latest version: 1.8.21.EA, current: 1.8.21.EA
+ERROR DIALOG: Must input a valid Simbrief ID!
+[Updater] Latest version: 1.10.2.Experimental, current: 1.8.21.EA
+[QuitGuard] wantsToQuit | programStarted=False | approved=True | allowQuit=True

@@ -1,0 +1,29 @@
+[package]
+name = "hangar-runtime"
+description = "ProtonEnv, companion prefix, runner, /proc watcher and PID adoption"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+hangar-core  = { workspace = true }
+hangar-steam = { workspace = true }
+hangar-msfs  = { workspace = true }
+nix          = { workspace = true }
+serde        = { workspace = true }
+serde_json   = { workspace = true }
+toml         = { workspace = true }
+inotify      = { workspace = true }
+tokio        = { workspace = true }
+thiserror    = { workspace = true }
+tracing      = { workspace = true }
+roxmltree    = "0.20"
+
+[dev-dependencies]
+# For `examples/preflight.rs` and the `sim_simconnect` tests: a real SimConnect
+# handshake is the honest readiness check, and a bare TCP connect is not — the
+# sim accepts the socket during its loading screen without ever completing the
+# handshake.
+simconnect-tcp = { workspace = true }
+hangar-catalog = { workspace = true }

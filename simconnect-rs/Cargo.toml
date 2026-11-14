@@ -1,0 +1,23 @@
+[package]
+name        = "simconnect-tcp"
+version     = "0.1.0"
+edition     = "2021"
+license     = "MIT"
+authors     = ["TripleJumpStudios"]
+description = "SimConnect over TCP for MSFS 2024 on Linux — no Windows SDK, no named pipe"
+repository  = "https://github.com/TripleJumpStudios/HangarRS"
+keywords    = ["simconnect", "msfs", "flightsim", "telemetry"]
+categories  = ["aerospace", "network-programming"]
+rust-version = "1.85"
+
+[dependencies]
+# Deliberately NO egui / eframe: a GUI is woken through `WakeFn`, so the crate
+# tests and ships on its own.
+tokio     = { version = "1", features = ["rt-multi-thread", "time", "sync", "net", "io-util", "macros"] }
+thiserror = "2"
+tracing   = "0.1"
+
+[dev-dependencies]
+# Examples only: lets the telemetry probe surface SimConnect exceptions,
+# which is how you tell "the sim rejected this SimVar" from "the value is 0".
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

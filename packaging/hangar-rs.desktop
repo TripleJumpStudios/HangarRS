@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=HangarRS
+Comment=Flight simulator toolbox for Linux
+Exec=hangar-rs
+Icon=hangar-rs
+Terminal=false
+Categories=Game;Utility;
+StartupWMClass=hangar-rs

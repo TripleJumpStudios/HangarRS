@@ -1,0 +1,17 @@
+[package]
+name = "hangar-msfs"
+description = "MSFS 2024 specifics: UserCfg.opt, Community, layout.json, EXE.xml, manifests"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+hangar-core  = { workspace = true }
+hangar-steam = { workspace = true }
+serde        = { workspace = true }
+serde_json   = { workspace = true }
+quick-xml    = { workspace = true }
+encoding_rs  = { workspace = true }
+thiserror    = { workspace = true }
+tracing      = { workspace = true }

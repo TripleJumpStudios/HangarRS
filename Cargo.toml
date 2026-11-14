@@ -1,0 +1,106 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/hangar-ui",
+    "crates/hangar-core",
+    "crates/hangar-steam",
+    "crates/hangar-msfs",
+    "crates/hangar-catalog",
+    "crates/hangar-bindings",
+    "crates/hangar-runtime",
+    "crates/hangar-install",
+    "crates/hangar-bridges",
+    "crates/hangar-nav",
+    "crates/hangar-app",
+]
+
+[workspace.package]
+version      = "1.2.0"
+edition      = "2021"
+authors      = ["TripleJumpStudios"]
+license      = "MIT"
+rust-version = "1.85"
+
+[workspace.dependencies]
+# ── GUI ───────────────────────────────────────────────────────────────────────
+# 0.35 is the ceiling, not a preference: egui-phosphor tops out at 0.13, which
+# requires egui ^0.35, and the Phosphor icon family is load-bearing in
+# `hangar-ui` (see the ICONS note in theme.rs). Revisit only when egui-phosphor
+# ships for 0.36+.
+eframe        = { version = "0.35", default-features = true }
+egui          = "0.35"
+egui_extras   = "0.35"
+egui-phosphor = "0.13"
+# 0.57 is the newest that resolves to a single egui 0.35; 0.58 pulls egui 0.36,
+# which puts two incompatible egui copies in one tree.
+walkers       = "0.57"
+
+# ── Async runtime ─────────────────────────────────────────────────────────────
+tokio = { version = "1", features = ["rt-multi-thread", "time", "sync", "net", "io-util", "macros", "signal", "fs", "process"] }
+
+# ── Serialization ─────────────────────────────────────────────────────────────
+serde      = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml       = "0.8"
+
+# ── XML ───────────────────────────────────────────────────────────────────────
+# `encoding` is not optional here: EXE.xml declares Windows-1252, and MSFS's
+# input profiles must round-trip byte-identical.
+quick-xml   = { version = "0.42", features = ["encoding"] }
+encoding_rs = "0.8"
+
+# ── File system ───────────────────────────────────────────────────────────────
+memmap2 = "0.9"
+walkdir = "2"
+# `default-features = false` drops bzip2, zstd and the encryption backends: MSFS
+# scenery ships as ordinary deflate, and every extra codec is a C dependency in
+# a crate that reads untrusted downloads.
+zip     = { version = "2", default-features = false, features = ["deflate"] }
+
+# ── Process & Linux specifics ─────────────────────────────────────────────────
+inotify = "0.11"
+nix     = { version = "0.30", features = ["process", "signal", "fs"] }
+
+# ── Collections ───────────────────────────────────────────────────────────────
+indexmap = { version = "2", features = ["serde"] }
+
+# ── Error handling ────────────────────────────────────────────────────────────
+anyhow    = "1"
+thiserror = "2"
+
+# ── Logging / tracing ─────────────────────────────────────────────────────────
+tracing            = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+dirs = "6"
+rfd  = "0.15"
+
+# ── Internal crates ───────────────────────────────────────────────────────────
+hangar-ui       = { path = "crates/hangar-ui" }
+hangar-core     = { path = "crates/hangar-core" }
+hangar-steam    = { path = "crates/hangar-steam" }
+hangar-msfs     = { path = "crates/hangar-msfs" }
+hangar-catalog  = { path = "crates/hangar-catalog" }
+hangar-bindings = { path = "crates/hangar-bindings" }
+hangar-runtime  = { path = "crates/hangar-runtime" }
+hangar-install  = { path = "crates/hangar-install" }
+hangar-bridges  = { path = "crates/hangar-bridges" }
+hangar-nav      = { path = "crates/hangar-nav" }
+
+# ── Vendored crate ────────────────────────────────────────────────────────────
+# Lives in this repository because HangarRS is where it is used; other projects
+# can point a path dependency here.
+simconnect-tcp = { path = "simconnect-rs" }
+
+[profile.dev]
+# Full DWARF (the default) puts ~0.5 GB of symbols in every debug binary and
+# grows `target/` to tens of GB. Line tables keep file and line numbers in
+# panics and backtraces, which is all a debug build here is read for.
+debug = "line-tables-only"
+
+[profile.release]
+opt-level     = 3
+lto           = "thin"
+codegen-units = 1
+strip         = "symbols"

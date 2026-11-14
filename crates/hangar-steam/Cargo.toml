@@ -1,0 +1,13 @@
+[package]
+name = "hangar-steam"
+description = "Steam VDF parser and SteamEnv discovery"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+hangar-core = { workspace = true }
+indexmap    = { workspace = true }
+thiserror   = { workspace = true }
+tracing     = { workspace = true }

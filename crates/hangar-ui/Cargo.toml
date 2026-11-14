@@ -1,0 +1,12 @@
+[package]
+name = "hangar-ui"
+description = "HangarRS design system — palette, typography, layout and control primitives"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+egui          = { workspace = true }
+egui-phosphor = { workspace = true }
+walkers = { workspace = true }

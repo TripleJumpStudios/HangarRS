@@ -1,0 +1,7 @@
+name: "HangarRS CodeQL config"
+
+# Default query suite. Examples stay scanned (A11); only build output and the
+# local archive are ignored.
+paths-ignore:
+  - target
+  - archive

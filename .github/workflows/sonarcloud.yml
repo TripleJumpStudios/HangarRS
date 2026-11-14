@@ -1,0 +1,56 @@
+name: SonarCloud
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # required for blame/history analysis
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-sonar-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-sonar-
+
+      - name: Install cargo-tarpaulin
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-tarpaulin
+
+      # No -D warnings here: a warning is data for Sonar, not a reason to stop
+      # before the scan. clippy.yml is the gate.
+      - name: Clippy report (JSON)
+        run: cargo clippy --workspace --all-targets --locked --message-format=json > clippy-report.json
+
+      - name: Coverage report (Cobertura)
+        run: cargo tarpaulin --workspace --engine llvm --out xml --locked --timeout 1800 --exclude-files 'target/*' 'archive/*' -- --test-threads=1
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

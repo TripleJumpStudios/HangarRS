@@ -1,0 +1,15 @@
+[package]
+name = "hangar-bridges"
+description = "Headless LittleNavMap and EFB (XGPS/XATT) output bridges"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+hangar-core    = { workspace = true }
+simconnect-tcp = { workspace = true }
+tokio          = { workspace = true }
+thiserror   = { workspace = true }
+tracing     = { workspace = true }
+tracing-subscriber = { workspace = true }

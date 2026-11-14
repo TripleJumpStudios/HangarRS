@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.triplejumpstudios.HangarRS</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+
+  <name>HangarRS</name>
+  <summary>Flight simulator toolbox for Linux</summary>
+  <developer id="com.triplejumpstudios">
+    <name>Triple Jump Studios</name>
+  </developer>
+
+  <description>
+    <p>
+      The one-stop toolbox for flight sim on Linux — add-ons, profiles, Windows
+      installers, control bindings, Proton prefixes, telemetry bridges and a map,
+      in one app.
+    </p>
+    <ul>
+      <li>Preflight: start the simulator and companion apps in order, with readiness checks</li>
+      <li>Hangar: everything installed, filed by kind — Community packages, in-sim add-ons, companion apps and native tools</li>
+      <li>Profiles: named sets of enabled packages, switched by moving only what changed</li>
+      <li>Install: Windows installers, scenery folders and ZIP archives, with replaced copies preserved</li>
+      <li>Bindings: snapshot, compare, search and export the simulator's input profiles</li>
+      <li>Map and Bridges: Little Navmap and EFB output from one telemetry stream</li>
+      <li>Prefix: set up and inspect the Proton prefix companion apps run in</li>
+    </ul>
+    <p>
+      HangarRS is never required to fly: close or remove it and the simulator
+      launches exactly as before.
+    </p>
+  </description>
+
+  <url type="homepage">https://triplejumpstudios.github.io/HangarRS/</url>
+
+  <launchable type="desktop-id">hangar-rs.desktop</launchable>
+  <provides>
+    <binary>hangar-rs</binary>
+  </provides>
+
+  <categories>
+    <category>Game</category>
+    <category>Utility</category>
+  </categories>
+  <keywords>
+    <keyword>flight simulator</keyword>
+    <keyword>MSFS</keyword>
+    <keyword>Proton</keyword>
+    <keyword>SimConnect</keyword>
+  </keywords>
+
+  <content_rating type="oars-1.1" />
+
+  <releases>
+    <release version="1.2.0" date="2026-11-02" />
+    <release version="1.1.0" date="2026-10-19" />
+    <release version="1.0.1" date="2026-10-10" />
+    <release version="1.0.0" date="2026-10-10" />
+  </releases>
+</component>

@@ -1,0 +1,13 @@
+Mono path[0] = 'C:/BeyondATC/BeyondATC_Data/Managed'
+Mono config path = 'C:/BeyondATC/MonoBleedingEdge/etc'
+Initialize engine version: 2022.3.62f2 (7670c08855a9)
+[Updater] Latest version: 1.10.4.Experimental, current: 1.10.4.Experimental
+Detected Microsoft Flight Simulator 2024 process
+Flight Simulator Build Version: 1,8,16,0 | module=FlightSimulator2024.exe size=0xE3AD200
+[SimConnectBridge] in-process bridge active
+[SimConnectBridge] SimConnect session opened (SimConnect.dll: C:/BeyondATC/BeyondATC_Data\Plugins\x86_64\SimConnect.dll)
+[SimConnectBridge] SimConnect session opened (SimConnect.dll: C:/BeyondATC/BeyondATC_Data\Plugins\x86_64\SimConnect.dll)
+[Sim] CAMERA STATE -1 -> 0 | NotInFlight | sim=2024
+[SimConnectBridge] SimConnect OPEN: app='SunRise' version=12.2.282174.999 -> Msfs2024
+[SimConnectBridge] facility definitions registered (Msfs2024, speed descriptors on, 0 synchronous failures)
+[SimConnectBridge] SimConnect OPEN: app='SunRise' version=12.2.282174.999 -> Msfs2024

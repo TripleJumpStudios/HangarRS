@@ -1,0 +1,27 @@
+target/
+/dist/
+/backups/
+/*.log
+__pycache__/
+/traces/
+/archive/
+/prototypes/
+/.claude/
+/.codex/
+/.backup-retention
+# Session workflow copies (trash and per-session snapshots), at any depth.
+.trash/
+.snapshots/
+/compat/project-airports/
+/scripts/trace-next-flight.py
+/scripts/test_trace_next_flight.py
+
+# Docs are private by default; publish by allowlist.
+*.md
+!/README.md
+!/CHANGELOG.md
+!/simconnect-rs/README.md
+!/compat/littlenavmap/README.md
+!/website/text.md
+/docs/*
+!/docs/PACKAGING.md
