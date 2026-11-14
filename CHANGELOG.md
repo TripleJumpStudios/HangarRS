@@ -38,6 +38,8 @@
 - Install, placing a dropped package, deleting a preserved copy and applying a
   loadout now wait while a Remove is running, as Remove already waited for them.
 - Authorship is now Triple Jump Studios.
+- The Prefix tab's sim-link line no longer spells out the sim's AppData path when
+  that folder is missing; it names the folder in one sentence.
 - **Security:** the archive reader that unpacks dropped packages is updated to
   `zip` 9.5 (fixes GHSA-m665-v7pm-7grj, GHSA-q7v9-x93c-xqv3 and
   GHSA-8hxf-qr8p-62x4), and the map's TLS library to `rustls` 0.23.46. Building

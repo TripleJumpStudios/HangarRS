@@ -107,11 +107,12 @@ impl Check {
             State::Linked if self.target_exists => {
                 "companion apps resolve the sim's AppData through this link".into()
             }
-            State::Linked => format!(
-                "the link is there but {} is not — companion apps will read this as \
-                 the sim not being installed",
-                self.want.display()
-            ),
+            // The sim's own AppData path is ~125 characters on a default
+            // install, so naming it would make the line a paragraph (the
+            // prefix tab's one-sentence rule). The folder is named instead.
+            State::Linked => "the link is there but the sim's AppData folder is not — companion \
+                              apps will read this as the sim not being installed"
+                .into(),
             State::Elsewhere { target } => format!(
                 "points at {} rather than the sim prefix — left alone, because somebody \
                  aimed it there",
@@ -129,10 +130,9 @@ impl Check {
             State::Missing if self.target_exists => {
                 "missing — no companion app in this prefix can find the sim".into()
             }
-            State::Missing => format!(
-                "missing, and {} does not exist either, so there is nothing to point at",
-                self.want.display()
-            ),
+            State::Missing => "missing, and the sim's AppData folder does not exist either, \
+                               so there is nothing to point at"
+                .into(),
             State::Unreadable(why) => format!("could not be inspected: {why}"),
         }
     }
@@ -432,5 +432,27 @@ mod tests {
             check(&companion, &alias.join("pfx")).is_good(),
             "the same directory reached by another path must compare equal"
         );
+    }
+
+    /// The prefix tab shows `why` as one sentence (≤ 160 characters, the
+    /// app's `no_prose_run_is_longer_than_a_sentence`). With the sim's AppData
+    /// missing, the line used to embed that ~125-character path and reach 196:
+    /// invisible on a machine with MSFS installed, failing on CI's runner.
+    /// Pinned here with a default-install path so it no longer depends on the
+    /// host.
+    #[test]
+    fn the_target_missing_lines_stay_one_sentence_whatever_the_path() {
+        let pfx = PathBuf::from("/mnt/steam/SteamLibrary/steamapps/compatdata/2537590/pfx");
+        for state in [State::Missing, State::Linked] {
+            let found = Check {
+                link: pfx.join("companion").join(RELATIVE),
+                want: pfx.join(RELATIVE),
+                target_exists: false,
+                state: state.clone(),
+            };
+            let why = found.why();
+            assert!(why.chars().count() <= 160, "{state:?}: {why}");
+            assert!(why.contains("the sim's AppData folder"), "{state:?}: {why}");
+        }
     }
 }
