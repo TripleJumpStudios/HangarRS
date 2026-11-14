@@ -102,7 +102,7 @@ impl Reader {
             match self.file.read(&mut buffer) {
                 Ok(0) => break,
                 Ok(read) => {
-                    for chunk in buffer[..read].chunks_exact(EVENT_SIZE) {
+                    for chunk in buffer[..read].as_chunks::<EVENT_SIZE>().0 {
                         events.push(parse_event(chunk));
                     }
                     // A short read means the queue is drained.

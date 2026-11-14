@@ -168,7 +168,7 @@ impl Control {
         for bank in [Bank::R, Bank::L] {
             if code >= bank.base() {
                 let delta = code - bank.base();
-                if delta % 0x10 == 0 {
+                if delta.is_multiple_of(0x10) {
                     if let Some(axis) = Axis::from_offset(delta / 0x10) {
                         return Some(Control::Axis { bank, axis });
                     }

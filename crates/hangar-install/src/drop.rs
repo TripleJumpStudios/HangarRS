@@ -1563,8 +1563,8 @@ mod tests {
     fn zip_of(path: &Path, entries: &[(&str, &str)]) {
         let file = std::fs::File::create(path).expect("create");
         let mut writer = zip::ZipWriter::new(file);
-        let options: zip::write::FileOptions<'_, ()> =
-            zip::write::FileOptions::default().compression_method(zip::CompressionMethod::Stored);
+        let options = zip::write::SimpleFileOptions::default()
+            .compression_method(zip::CompressionMethod::Stored);
         for (name, body) in entries {
             writer.start_file(*name, options).expect("start");
             writer.write_all(body.as_bytes()).expect("write");

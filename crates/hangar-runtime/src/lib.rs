@@ -25,6 +25,8 @@ pub mod sim;
 pub mod sim_session;
 pub mod sim_simconnect;
 pub mod simlink;
+#[cfg(test)]
+mod test_app;
 
 /// Re-exported from `hangar-core`, where it lives so that `hangar-bindings`
 /// (the Steam-is-closed gate) and the preflight can use it without a second

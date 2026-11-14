@@ -391,22 +391,20 @@ mod tests {
         }
     }
 
-    /// A uniquely-named symlink to a real program, so `argv[0]` carries a name
-    /// the `/proc` scan can find.
-    fn fake_app(dir: &Path, target: &str) -> PathBuf {
-        let exe = dir.join(format!(
-            "hangar-runner-app-{}-{}.exe",
-            std::process::id(),
-            dir.file_name().unwrap().to_string_lossy()
-        ));
-        let target = ["/bin", "/usr/bin"]
-            .iter()
-            .map(|p| Path::new(p).join(target))
-            .find(|p| p.exists())
-            .expect("program is available");
-        std::os::unix::fs::symlink(target, &exe).unwrap();
-        exe
+    /// A uniquely-named fake app, so `argv[0]` carries a name the `/proc` scan
+    /// can find. What it does is the request's `-c` script (`test_app`).
+    fn fake_app(dir: &Path) -> PathBuf {
+        crate::test_app::fake_app(
+            dir,
+            &format!(
+                "hangar-runner-app-{}-{}.exe",
+                std::process::id(),
+                dir.file_name().unwrap().to_string_lossy()
+            ),
+        )
     }
+
+    use crate::test_app::{LONG_RUNNING, SILENT_EXIT};
 
     #[test]
     fn the_match_key_is_the_executable_name() {
@@ -419,8 +417,8 @@ mod tests {
     #[tokio::test]
     async fn a_running_app_is_adopted_instead_of_launched_twice() {
         let dir = scratch();
-        let exe = fake_app(&dir, "sleep");
-        let request = native(exe.clone(), &["60"]);
+        let exe = fake_app(&dir);
+        let request = native(exe.clone(), &LONG_RUNNING);
 
         let first = launch(&env(), &request).await;
         let first_pid = match first {
@@ -451,15 +449,15 @@ mod tests {
     #[tokio::test]
     async fn an_app_started_elsewhere_is_adopted() {
         let dir = scratch();
-        let exe = fake_app(&dir, "sleep");
+        let exe = fake_app(&dir);
         // Started through std, never awaited — as far as `launch` knows, this
         // is somebody else's process.
         let mut outsider = std::process::Command::new(&exe)
-            .arg("60")
+            .args(LONG_RUNNING)
             .spawn()
             .expect("spawns");
 
-        let request = native(exe, &["60"]);
+        let request = native(exe, &LONG_RUNNING);
         for _ in 0..200 {
             if already_running(&request).is_running() {
                 break;
@@ -489,8 +487,8 @@ mod tests {
     #[tokio::test]
     async fn an_instant_silent_exit_is_reported_as_a_failure() {
         let dir = scratch();
-        let exe = fake_app(&dir, "true");
-        let request = native(exe, &[]);
+        let exe = fake_app(&dir);
+        let request = native(exe, &SILENT_EXIT);
 
         match launch(&env(), &request).await {
             Launched::Failed { outcome, .. } => {
@@ -508,8 +506,8 @@ mod tests {
     #[tokio::test]
     async fn a_quick_exit_that_printed_something_is_not_the_lock() {
         let dir = scratch();
-        let exe = fake_app(&dir, "echo");
-        let request = native(exe, &["app started, then gave up"]);
+        let exe = fake_app(&dir);
+        let request = native(exe, &["-c", "echo 'app started, then gave up'"]);
 
         match launch(&env(), &request).await {
             Launched::Failed { outcome, log } => {
@@ -529,8 +527,8 @@ mod tests {
     #[tokio::test]
     async fn a_restart_replaces_the_process_rather_than_adopting_it() {
         let dir = scratch();
-        let exe = fake_app(&dir, "sleep");
-        let request = native(exe, &["60"]);
+        let exe = fake_app(&dir);
+        let request = native(exe, &LONG_RUNNING);
 
         let first = match launch(&env(), &request).await {
             Launched::Started(app) => app.pid,
@@ -556,8 +554,8 @@ mod tests {
     #[tokio::test]
     async fn restarting_something_stopped_simply_starts_it() {
         let dir = scratch();
-        let exe = fake_app(&dir, "sleep");
-        let request = native(exe, &["60"]);
+        let exe = fake_app(&dir);
+        let request = native(exe, &LONG_RUNNING);
 
         assert!(!already_running(&request).is_running());
         match restart(&env(), &request).await {

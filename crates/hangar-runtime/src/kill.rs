@@ -538,7 +538,6 @@ pub fn is_running(needle: &str) -> AppProcesses {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::path::Path;
     use std::process::Command;
 
     /// Start a process that ignores nothing and lives until killed.
@@ -619,31 +618,23 @@ mod tests {
     /// The whole point, end to end: find an app by the file name of its
     /// executable, then stop it — without ever having spawned it ourselves.
     ///
-    /// The fixture is a real binary under a unique name, so the test drives
+    /// The fixture is a real program under a unique name, so the test drives
     /// the same match key the app uses. A marker in the arguments does not
     /// work: `sleep 300 marker` makes GNU sleep try to sum the arguments and
     /// exit, and `sh -c 'sleep 300 # marker'` is exec-optimised by the shell
     /// into a bare `sleep`, dropping the comment before it reaches `/proc`.
+    /// Why the program is `/bin/sh` and not `sleep`: `crate::test_app`.
     #[tokio::test]
     async fn finds_and_stops_an_app_by_its_executable_name() {
         let dir = std::env::temp_dir().join(format!("hangar-kill-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
-        let exe = dir.join(format!("hangar-test-app-{}.exe", std::process::id()));
-        // A symlink, not a copy. Copying then immediately executing races with
-        // `fork`: a descriptor still open for writing in any thread makes the
-        // exec fail with ETXTBSY, which is easy to hit when tests run in
-        // parallel. `argv[0]` is whatever path the caller passed, so the unique
-        // name still reaches /proc.
-        let target = ["/bin/sleep", "/usr/bin/sleep"]
-            .into_iter()
-            .find(|p| Path::new(p).exists())
-            .expect("sleep is available");
-        std::os::unix::fs::symlink(target, &exe).unwrap();
+        let exe =
+            crate::test_app::fake_app(&dir, &format!("hangar-test-app-{}.exe", std::process::id()));
 
         let mut child = Command::new(&exe)
-            .arg("60")
+            .args(crate::test_app::LONG_RUNNING)
             .spawn()
-            .expect("the copied binary runs");
+            .expect("the fake app runs");
 
         // The needle is derived exactly as the app derives it.
         let needle = proc::match_key(&exe);

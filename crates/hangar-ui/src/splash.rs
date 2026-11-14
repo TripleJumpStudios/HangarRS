@@ -197,7 +197,7 @@ fn draw_status_line(
             font,
             theme::OK,
         );
-    } else if ((elapsed * 3.0) as u32) % 2 == 0 {
+    } else if ((elapsed * 3.0) as u32).is_multiple_of(2) {
         painter.text(
             pos,
             Align2::CENTER_CENTER,

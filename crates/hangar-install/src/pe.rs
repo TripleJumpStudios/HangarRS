@@ -221,7 +221,7 @@ impl Headers {
 
         let mut sections = Vec::with_capacity(section_count);
         let table = read_at(file, pe_at + 24 + optional_size as u64, section_count * 40)?;
-        for chunk in table.chunks_exact(40) {
+        for chunk in table.as_chunks::<40>().0 {
             let name = String::from_utf8_lossy(&chunk[0..8])
                 .trim_end_matches('\0')
                 .trim_end()
@@ -541,8 +541,10 @@ fn utf16_at(buf: &[u8], start: usize, end: usize) -> String {
         return String::new();
     }
     let units: Vec<u16> = buf[start..end]
-        .chunks_exact(2)
-        .map(|c| u16::from_le_bytes([c[0], c[1]]))
+        .as_chunks::<2>()
+        .0
+        .iter()
+        .map(|c| u16::from_le_bytes(*c))
         .take_while(|&u| u != 0)
         .collect();
     String::from_utf16_lossy(&units).trim_end().to_string()
@@ -558,12 +560,12 @@ mod tests {
         for unit in key.encode_utf16().chain(std::iter::once(0)) {
             out.extend_from_slice(&unit.to_le_bytes());
         }
-        while out.len() % 4 != 0 {
+        while !out.len().is_multiple_of(4) {
             out.push(0);
         }
         out.extend_from_slice(value);
         for child in children {
-            while out.len() % 4 != 0 {
+            while !out.len().is_multiple_of(4) {
                 out.push(0);
             }
             out.extend_from_slice(child);

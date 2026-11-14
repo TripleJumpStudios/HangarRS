@@ -19,7 +19,7 @@ version      = "1.2.0"
 edition      = "2021"
 authors      = ["TripleJumpStudios"]
 license      = "MIT"
-rust-version = "1.85"
+rust-version = "1.88"
 
 [workspace.dependencies]
 # ── GUI ───────────────────────────────────────────────────────────────────────
@@ -55,7 +55,7 @@ walkdir = "2"
 # `default-features = false` drops bzip2, zstd and the encryption backends: MSFS
 # scenery ships as ordinary deflate, and every extra codec is a C dependency in
 # a crate that reads untrusted downloads.
-zip     = { version = "2", default-features = false, features = ["deflate"] }
+zip     = { version = "9.0.5", default-features = false, features = ["deflate"] }
 
 # ── Process & Linux specifics ─────────────────────────────────────────────────
 inotify = "0.11"

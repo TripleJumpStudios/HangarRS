@@ -48,7 +48,7 @@ cargo run -p hangar-app            # the binary is `hangar-rs`
 cargo test --workspace -- --test-threads=1
 ```
 
-Needs Rust 1.85 or newer. The only C code is the bundled SQLite, built by
+Needs Rust 1.88 or newer. The only C code is the bundled SQLite, built by
 `cargo` with the system C compiler. Release builds target glibc 2.31; see
 [`docs/PACKAGING.md`](docs/PACKAGING.md).
 

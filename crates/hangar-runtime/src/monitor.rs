@@ -138,13 +138,10 @@ mod tests {
     use std::sync::atomic::{AtomicUsize, Ordering};
 
     fn fake_app(dir: &Path) -> PathBuf {
-        let exe = dir.join(format!("hangar-monitor-app-{}.exe", std::process::id()));
-        let target = ["/bin/sleep", "/usr/bin/sleep"]
-            .into_iter()
-            .find(|p| Path::new(p).exists())
-            .unwrap();
-        std::os::unix::fs::symlink(target, &exe).unwrap();
-        exe
+        crate::test_app::fake_app(
+            dir,
+            &format!("hangar-monitor-app-{}.exe", std::process::id()),
+        )
     }
 
     #[test]
@@ -174,7 +171,10 @@ mod tests {
         tokio::time::sleep(Duration::from_millis(150)).await;
         assert!(!monitor.running().is_running(&key));
 
-        let mut child = std::process::Command::new(&exe).arg("60").spawn().unwrap();
+        let mut child = std::process::Command::new(&exe)
+            .args(crate::test_app::LONG_RUNNING)
+            .spawn()
+            .unwrap();
 
         // The poll interval is two seconds; give it room.
         let mut seen = false;
