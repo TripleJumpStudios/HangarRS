@@ -1,4 +1,7 @@
 target/
+# Release tooling (zig, cargo-zigbuild, appimagetool), kept out of target/ so a
+# clean of build output does not cost a re-download. See docs/PACKAGING.md.
+/tools/
 /dist/
 /backups/
 /*.log

@@ -27,14 +27,17 @@ python3 packaging/package.py --binary target/debug/hangar-rs --version 0.1.0 --d
 Release binaries are linked against glibc 2.31 (Ubuntu 20.04, Debian 11) with
 [cargo-zigbuild](https://github.com/rust-cross/cargo-zigbuild), which uses
 [zig](https://ziglang.org/download/) as the C compiler and linker. The only C in
-the graph is the bundled SQLite. Both tools are unpacked under the lane's
-`target/` and put on `PATH` for the one command; nothing is installed. Point
-the caches there too so nothing lands in `~/.cache`:
+the graph is the bundled SQLite. Both tools are unpacked under the
+gitignored `tools/` at the project root, together with an extracted
+appimagetool (`tools/appimagetool/AppRun`), and put on `PATH` for the one
+command; nothing is installed. The caches go under `target/` so nothing lands
+in `~/.cache` and a clean removes them:
 
 ```sh
-T=$PWD/target/lane-wave-p2/tools          # zig 0.16.0, cargo-zigbuild 0.23.4
+T=$PWD/tools                              # zig 0.16.0, cargo-zigbuild 0.23.4
+C=$PWD/target/zig-cache
 export PATH=$T/zig/zig-x86_64-linux-0.16.0:$T/zigbuild/cargo-zigbuild-x86_64-unknown-linux-gnu:$PATH \
-  XDG_CACHE_HOME=$T/cache ZIG_GLOBAL_CACHE_DIR=$T/cache/zig ZIG_LOCAL_CACHE_DIR=$T/cache/zig-local
+  XDG_CACHE_HOME=$C ZIG_GLOBAL_CACHE_DIR=$C/zig ZIG_LOCAL_CACHE_DIR=$C/zig-local
 # Panic locations name source files; keep the builder's paths out of the binary.
 export RUSTFLAGS="--remap-path-prefix=$HOME/.cargo=/cargo --remap-path-prefix=$HOME/.rustup=/rustup --remap-path-prefix=$PWD=/build"
 nice -n 10 cargo zigbuild -p hangar-app --release --locked --offline \
@@ -43,8 +46,8 @@ B=target/x86_64-unknown-linux-gnu/release/hangar-rs   # under $CARGO_TARGET_DIR 
 objdump -T $B | grep -o 'GLIBC_[0-9.]*' | sort -uV | tail -1   # must be <= GLIBC_2.31
 strings $B | grep -c -e /home/ -e "$HOME"                       # must be 0
 python3 packaging/package.py --binary $B --version 1.0.1 \
-  --appimagetool /path/to/extracted-appimagetool/AppRun \
-  --runtime /path/to/runtime-x86_64
+  --appimagetool tools/appimagetool/AppRun \
+  --runtime packaging/runtime/runtime-x86_64
 ```
 
 The `.2.31` suffix on the target is cargo-zigbuild's glibc pin; the Rust target
